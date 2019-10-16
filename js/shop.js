@@ -1,25 +1,32 @@
 window.Shop = {
-    API_BASE_URL:"http://localhost:8085",
-    getProducts: function (){
+    API_BASE_URL: "http://localhost:8085",
 
+
+    getProducts: function(){
         $.ajax({
-            url: Shop.API_BASE_URL + "/products",
-            method: "GET"
-        }).done(function(response){
+            url: Shop.API_BASE_URL+ "/products",
+            method:"GET"
+        }).done(function (response) {
             console.log(response);
             Shop.displayProducts(response.content);
+
         })
+
+
     },
+    displayProducts: function (products) {
+        var allProductsHtml="";
 
-    displayProducts: function (products){
-        var allProductsHtml = "";
-
-        products.forEach(product => allProductsHtml += Shop.getProductHtml(product))
+        products.forEach(product => allProductsHtml += Shop.getProductHtml(product));
 
         $(".single-product-area .row").html(allProductsHtml);
+
+
+
     },
 
-    getProductHtml: function (product) {
+
+    getProductHtml:function (product) {
         return `<div class="col-md-3 col-sm-6">
                     <div class="single-shop-product">
                         <div class="product-upper">
@@ -35,7 +42,44 @@ window.Shop = {
                         </div>                       
                     </div>
                 </div>`
-    }
-};
 
-Shop.getProducts()
+    },
+    addProductToCart(productId) {
+        //customerId to be read from memory somehow in future
+        var customerId = 2;
+        var requestBody = {
+            customerId:customerId,
+            productId:productId
+        };
+
+        $.ajax({
+            url:Shop.API_BASE_URL + "/carts",
+            method: "PUT",
+            contentType:"application/json",
+            data: JSON.stringify(requestBody)
+        }).done(function () {
+            //pt redirect
+            window.location.replace("cart.html")
+
+        })
+    },
+
+    bindEvents: function () {
+
+        $('.single-product-area .row').delegate('.add_to_cart_button','click',function (event) {
+            event.preventDefault();
+
+            var productId = $(this).data('product_id');
+            Shop.addProductToCart(productId);
+
+
+        })
+
+    }
+
+
+
+
+};
+Shop.getProducts();
+Shop.bindEvents();
